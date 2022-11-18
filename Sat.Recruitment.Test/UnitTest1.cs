@@ -1,8 +1,8 @@
 using System;
 using System.Dynamic;
-
+using Entities.Class;
 using Microsoft.AspNetCore.Mvc;
-
+using Sat.Recruitment.Api;
 using Sat.Recruitment.Api.Controllers;
 
 using Xunit;
@@ -13,27 +13,60 @@ namespace Sat.Recruitment.Test
     public class UnitTest1
     {
         [Fact]
-        public void Test1()
+        public void CreateUser_Validation_False()
         {
-            var userController = new UsersController();
+            UserDataInput user = new UserDataInput();
 
-            var result = userController.CreateUser("Mike", "mike@gmail.com", "Av. Juan G", "+349 1122354215", "Normal", "124").Result;
+            user.Name = "Mike";
+            user.Email = null;
+            user.Address = "Av. Juan G";
+            user.Phone = null;
+            user.UserType = "Normal";
+            user.Money = "124";
 
+            var userController = new UsersController(new UserProcess());
+            var result = userController.CreateUser(user).Result;
+            Assert.False(result.IsSuccess);
+            Assert.NotEqual("User Created", result.Information);
 
-            Assert.Equal(true, result.IsSuccess);
-            Assert.Equal("User Created", result.Errors);
         }
 
         [Fact]
-        public void Test2()
+        public void CreateUser_DuplicateUser_true()
         {
-            var userController = new UsersController();
+            UserDataInput user = new UserDataInput();
 
-            var result = userController.CreateUser("Agustina", "Agustina@gmail.com", "Av. Juan G", "+349 1122354215", "Normal", "124").Result;
+            user.Name = "Agustina";
+            user.Email = "test@test";
+            user.Address = "Av. Juan G";
+            user.Phone = "+8654372";
+            user.UserType = "Normal";
+            user.Money = "124";
 
+            var userController = new UsersController(new UserProcess());
+            var result = userController.CreateUser(user).Result;
+            Assert.False(result.IsSuccess);
+            Assert.Equal("User is duplicated", result.Information);
 
-            Assert.Equal(false, result.IsSuccess);
-            Assert.Equal("The user is duplicated", result.Errors);
+        }
+
+        [Fact]
+        public void CreateUser_CreateUser_true()
+        {
+            UserDataInput user = new UserDataInput();
+
+            user.Name = "Jose";
+            user.Email = "test@test";
+            user.Address = "Av. Juan G";
+            user.Phone = "+8654372";
+            user.UserType = "Normal";
+            user.Money = "124";
+
+            var userController = new UsersController(new UserProcess());
+            var result = userController.CreateUser(user).Result;
+            Assert.True(result.IsSuccess);
+            Assert.Equal("User Created", result.Information);
+
         }
     }
 }
